@@ -1,13 +1,13 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Data
@@ -17,8 +17,8 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Vertex {
     private int id;
-    private List<Edge> outEdges = Lists.newArrayList();
-    private List<Edge> inEdges = Lists.newArrayList();
+    private Map<String, Edge> outEdges = Maps.newHashMap();
+    private Map<String, Edge> inEdges = Maps.newHashMap();
 
     public Vertex(int id) {
         this.id = id;

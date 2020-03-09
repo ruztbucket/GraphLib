@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Map;
-import java.util.UUID;
+import java.util.Random;
 
 @Data
 @ToString
@@ -20,6 +20,9 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Graph {
 
+    final int MAX_EDGES = 100;
+    final Random RANDOM = new Random();
+    final String EDGE_DELIMITER = "_";
     Map<Integer, Vertex> vertices;
 
     public void addVertex(Vertex v) throws DuplicateVertexException {
@@ -43,14 +46,15 @@ public class Graph {
         if (!vertices.containsKey(to.getId())) {
             throw new MissingVertexException("Missing vertex: " + to.getId());
         }
+        String id = from.getId() + EDGE_DELIMITER + to.getId() + EDGE_DELIMITER + RANDOM.nextInt(MAX_EDGES);
         Edge edge = Edge.builder()
                 .from(from.getId())
                 .to(to.getId())
                 .weight(weight)
-                .id(UUID.randomUUID().toString())
+                .id(id)
                 .build();
-        from.getOutEdges().add(edge);
-        to.getInEdges().add(edge);
+        from.getOutEdges().put(edge.getId(), edge);
+        to.getInEdges().put(edge.getId(), edge);
     }
 
     public void addEdge(Vertex from, Vertex to) throws MissingVertexException {
@@ -88,8 +92,17 @@ public class Graph {
         addBidirectionalEdge(fromId, toId, 0);
     }
 
-    public void removeEdge(int id) {
-        // TODO: rethink graph internal representation
+    public void removeEdge(Edge edge) {
+        vertices.get(edge.getFrom()).getOutEdges().remove(edge.getId());
+        vertices.get(edge.getTo()).getInEdges().remove(edge.getId());
+    }
+
+    public void removeEdge(String id) {
+        int fromVertex = getVertexFromEdge(id);
+        Edge edge = vertices.get(fromVertex).getOutEdges().get(id);
+        int toVertex = edge.getTo();
+        vertices.get(fromVertex).getOutEdges().remove(id);
+        vertices.get(toVertex).getInEdges().remove(id);
     }
 
     public void removeVertex(int id) {
@@ -98,5 +111,11 @@ public class Graph {
 
     public void print() {
         // TODO: something pretty
+    }
+
+    // UTIL Methods
+    private int getVertexFromEdge(String edgeId) {
+        String[] split = edgeId.split(EDGE_DELIMITER);
+        return Integer.parseInt(split[0]);
     }
 }
