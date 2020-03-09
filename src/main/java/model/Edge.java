@@ -1,25 +1,35 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Objects;
+import java.util.Random;
 
 @Data
 @ToString
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Edge {
     private String id;
     private int from;
     private int to;
     private int weight;
+    final static Random RANDOM = new Random();
+    final static String EDGE_DELIMITER = "_";
+
+    public Edge(int from, int to, int weight) {
+        this.id = from + EDGE_DELIMITER + to + EDGE_DELIMITER + weight + EDGE_DELIMITER + RANDOM.nextInt(Graph.MAX_EDGES);
+        this.from = from;
+        this.to = to;
+        this.weight = weight;
+    }
+
+    public Edge(int from, int to) {
+        this.id = from + EDGE_DELIMITER + to + EDGE_DELIMITER + 0 + EDGE_DELIMITER + RANDOM.nextInt(Graph.MAX_EDGES);
+        this.from = from;
+        this.to = to;
+    }
 
     @Override
     public boolean equals(Object o) {

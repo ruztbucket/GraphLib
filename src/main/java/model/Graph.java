@@ -1,6 +1,7 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.collect.Maps;
 import exception.DuplicateVertexException;
 import exception.MissingVertexException;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Map;
-import java.util.Random;
 
 @Data
 @ToString
@@ -20,10 +20,14 @@ import java.util.Random;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Graph {
 
-    final int MAX_EDGES = 100;
-    final Random RANDOM = new Random();
-    final String EDGE_DELIMITER = "_";
+    final static int MAX_EDGES = 100;
     Map<Integer, Vertex> vertices;
+
+    public static Graph newGraph() {
+        Graph graph = new Graph();
+        graph.vertices = Maps.newHashMap();
+        return graph;
+    }
 
     public void addVertex(Vertex v) throws DuplicateVertexException {
         if (vertices.containsKey(v.getId())) {
@@ -33,9 +37,7 @@ public class Graph {
     }
 
     public void addVertex(int id) throws DuplicateVertexException {
-        Vertex vertex = Vertex.builder()
-                .id(id)
-                .build();
+        Vertex vertex = new Vertex(id);
         addVertex(vertex);
     }
 
@@ -46,13 +48,7 @@ public class Graph {
         if (!vertices.containsKey(to.getId())) {
             throw new MissingVertexException("Missing vertex: " + to.getId());
         }
-        String id = from.getId() + EDGE_DELIMITER + to.getId() + EDGE_DELIMITER + RANDOM.nextInt(MAX_EDGES);
-        Edge edge = Edge.builder()
-                .from(from.getId())
-                .to(to.getId())
-                .weight(weight)
-                .id(id)
-                .build();
+        Edge edge = new Edge(from.getId(), to.getId(), weight);
         from.getOutEdges().put(edge.getId(), edge);
         to.getInEdges().put(edge.getId(), edge);
     }
@@ -115,7 +111,7 @@ public class Graph {
 
     // UTIL Methods
     private int getVertexFromEdge(String edgeId) {
-        String[] split = edgeId.split(EDGE_DELIMITER);
+        String[] split = edgeId.split(Edge.EDGE_DELIMITER);
         return Integer.parseInt(split[0]);
     }
 }
